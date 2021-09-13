@@ -6,17 +6,17 @@ declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 pub mod nft_vault {
     use super::*;
     pub fn new_nft_vault(ctx: Context<NewVault>) -> ProgramResult {
-        let account = &mut ctx.accounts.admin;
-        emit!(VaultEvent {
-            address: *account.key
-        });
+        let admin = &mut ctx.accounts.admin;
+        let vault_account = &mut ctx.accounts.vault_account;
+        vault_account.admin = *admin.key;
+        emit!(VaultEvent { admin: *admin.key });
         Ok(())
     }
 }
 
 #[derive(Accounts)]
 pub struct NewVault<'info> {
-    #[account(init, payer = admin, space = 8 + 8)]
+    #[account(init, payer = admin)]
     pub vault_account: ProgramAccount<'info, VaultState>,
     pub admin: AccountInfo<'info>,
     pub system_program: AccountInfo<'info>,
@@ -25,12 +25,12 @@ pub struct NewVault<'info> {
 #[account]
 #[derive(Default)]
 pub struct VaultState {
-    pub data: u8,
-    //pub admin: Vec<u8>,
+    //pub data: u8,
+    pub admin: Pubkey,
 }
 
 #[event]
 pub struct VaultEvent {
     #[index]
-    pub address: Pubkey,
+    pub admin: Pubkey,
 }
